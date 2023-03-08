@@ -16,7 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 
 const db = require("./app/models");
 
-db.sequelize.sync()
+db.con.sync()
 .then(() => {
   console.log("==== Database Connected ====");
 })
@@ -35,5 +35,5 @@ app.use("/login", login)
 app.use("/pessoa", pessoa)
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}.`);
+  console.log(`\n \n Servidor rodando na porta::: ${PORT}.`);
 });

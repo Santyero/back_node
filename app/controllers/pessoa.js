@@ -1,8 +1,9 @@
 // Responsavel por transitar as requisições do usuario/cliente para o controller
 
+const { Op } = require("sequelize");
+
 const db = require("../models");
 const Tutorial = db.tutorials;
-const Op = db.Sequelize.Op;
 
 // Create and Save a new Tutorial
 exports.create = (req, res) => {

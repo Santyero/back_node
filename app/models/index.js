@@ -1,8 +1,8 @@
 // Responsavel por cuidar das regras de negocio, acesso a dados e entidades
-
+const { Sequelize } = require("sequelize");
 const dbConfig = require("../config/db.config.js");
 
-const con = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
+const connection = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
   host: dbConfig.HOST,
   dialect: dbConfig.dialect,
   operatorsAliases: false,
@@ -18,9 +18,9 @@ const con = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
 const db = {};
 
 
-db.con = sequelize;
+db.con = connection;
 
-db.pessoa = require("./pessoa.js")(con);
-db.login = require("./login.js")(con);
+db.pessoa = require("./pessoa.js")(connection);
+db.login = require("./login.js")(connection);
 
 module.exports = db;
