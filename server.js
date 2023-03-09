@@ -4,10 +4,10 @@ const app = express();
 const login = require('./app/routes/login.routes');
 const pessoa = require('./app/routes/pessoa.routes');
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8250;
 
 var corsOptions = {
-  origin: "http://localhost:8081"
+  origin: "http://localhost:8250"
 };
 
 app.use(cors(corsOptions));
