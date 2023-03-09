@@ -1,154 +1,181 @@
 // Responsavel por transitar as requisições do usuario/cliente para o controller
+
 const { Op } = require("sequelize");
 
 const db = require("../models");
-const Tutorial = db.tutorials;
+const Login = db.login;
+const Pessoa = db.pessoa;
 
-// Create and Save a new Tutorial
-exports.create = (req, res) => {
+// Create uma nova login	
+create = (req, res) => {
     // Validate request
-    if (!req.body.title) {
+    if (!req.body.nome) {
         res.status(400).send({
-            message: "Content can not be empty!"
+            message: "login precisa de um nome!"
         });
         return;
     }
 
-    // Create a Tutorial
-    const tutorial = {
-        title: req.body.title,
-        description: req.body.description,
-        published: req.body.published ? req.body.published : false
+    const verificaPessoa = Login.findOne({ where: { email: req.body.email } });
+    if (verificaPessoa) {
+        res.status(400).send({
+            message: "Email já cadastrado!"
+        });
+        return;
+    }
+
+    const pessoa = {
+        nome: req.body.nome,
+        sobrenome: req.body.sobrenome,
+        cpf: req.body.cpf,
+        data_nascimento: req.body.data_nascimento,
+        sexo: req.body.sexo,
     };
+    const pessoaCriada = Pessoa.create(pessoa)
+    .then(data => {
 
-    // Save Tutorial in the database
-    Tutorial.create(tutorial)
+        if (!data) {
+            throw new Error("Problema para salvar a pessoa.");
+        }
+
+        // cria a login
+        const login = {
+            email: req.body.email,
+            senha: req.body.senha,
+            pessoa_id: pessoaCriada.id,
+        };
+
+        // Salva a login
+        Login.create(login)
+            .then(data => {
+                res.send(data);
+            })
+            .catch(err => {
+                res.status(500).send({
+                    message:
+                        err.message || "Problema para salvar a login."
+                });
+            });
+    })
+    .catch(err => {
+        res.status(500).send({
+            message:
+                err.message || "Problema para salvar a pessoa."
+        });
+    });
+};
+
+// Busca todas as logins
+findAll = (req, res) => {
+    const nome = req.query.nome;
+    var condition = nome ? { nome: { [Op.like]: `%${nome}%` } } : null;
+
+    Login.findAll({ where: condition })
         .then(data => {
             res.send(data);
         })
         .catch(err => {
             res.status(500).send({
                 message:
-                    err.message || "Some error occurred while creating the Tutorial."
+                    err.message || "Erro para buscar as logins."
             });
         });
 };
 
-// Retrieve all Tutorials from the database.
-exports.findAll = (req, res) => {
-    const title = req.query.title;
-    var condition = title ? { title: { [Op.like]: `%${title}%` } } : null;
-
-    Tutorial.findAll({ where: condition })
-        .then(data => {
-            res.send(data);
-        })
-        .catch(err => {
-            res.status(500).send({
-                message:
-                    err.message || "Some error occurred while retrieving tutorials."
-            });
-        });
-};
-
-// Find a single Tutorial with an id
-exports.findOne = (req, res) => {
+// Encontra login
+findOne = (req, res) => {
     const id = req.params.id;
 
-    Tutorial.findByPk(id)
+    Login.findByPk(id)
         .then(data => {
             if (data) {
                 res.send(data);
             } else {
                 res.status(404).send({
-                    message: `Cannot find Tutorial with id=${id}.`
+                    message: `Erro para buscar o login com id=${id}.`
                 });
             }
         })
         .catch(err => {
             res.status(500).send({
-                message: "Error retrieving Tutorial with id=" + id
+                message: "Erro para buscar a pessoa com id=" + id
             });
         });
 };
 
-// Update a Tutorial by the id in the request
-exports.update = (req, res) => {
+// Update login
+update = (req, res) => {
     const id = req.params.id;
 
-    Tutorial.update(req.body, {
+    Login.update(req.body, {
         where: { id: id }
     })
         .then(num => {
             if (num == 1) {
                 res.send({
-                    message: "Tutorial was updated successfully."
+                    message: "Login atualizado com sucesso ."
                 });
             } else {
                 res.send({
-                    message: `Cannot update Tutorial with id=${id}. Maybe Tutorial was not found or req.body is empty!`
+                    message: `Não foi possivel salvar a login com id=${id}.`
                 });
             }
         })
         .catch(err => {
             res.status(500).send({
-                message: "Error updating Tutorial with id=" + id
+                message: "Erro para atualizar o id=" + id
             });
         });
 };
 
-// Delete a Tutorial with the specified id in the request
-exports.delete = (req, res) => {
+// Deletar login
+_delete = (req, res) => {
     const id = req.params.id;
 
-    Tutorial.destroy({
+    Login.destroy({
         where: { id: id }
     })
         .then(num => {
             if (num == 1) {
                 res.send({
-                    message: "Tutorial was deleted successfully!"
+                    message: "login deletada com sucesso!"
                 });
             } else {
                 res.send({
-                    message: `Cannot delete Tutorial with id=${id}. Maybe Tutorial was not found!`
+                    message: `Não foi possivel deletar login com id=${id}.`
                 });
             }
         })
         .catch(err => {
             res.status(500).send({
-                message: "Could not delete Tutorial with id=" + id
+                message: "Não foi possivel deletar login com id=" + id
             });
         });
 };
 
 // Delete all Tutorials from the database.
-exports.deleteAll = (req, res) => {
-    Tutorial.destroy({
+deleteAll = (req, res) => {
+    Login.destroy({
         where: {},
         truncate: false
     })
         .then(nums => {
-            res.send({ message: `${nums} Tutorials were deleted successfully!` });
+            res.send({ message: `${nums} logins foram deletados com sucesso` });
         })
         .catch(err => {
             res.status(500).send({
                 message:
-                    err.message || "Some error occurred while removing all tutorials."
+                    err.message || "Não foi possivel deletar logins."
             });
         });
 };
 
-// find all published Tutorial
-exports.findAllPublished = (req, res) => {
-    Tutorial.findAll({ where: { published: true } })
-        .then(data => {
-            res.send(data);
-        })
-        .catch(err => {
-            res.status(500).send({
-                message:
-                    err.message || "Some error occurred while retrieving tutorials."
-            });
-        });
+
+exports = module.exports = {
+    create,
+    findAll,
+    findOne,
+    update,
+    delete: _delete,
+    deleteAll
 };
