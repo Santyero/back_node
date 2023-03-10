@@ -20,7 +20,6 @@ const db = {};
 
 db.con = connection;
 
-db.pessoa = require("./pessoa.js")(connection);
-db.login = require("./login.js")(connection);
+db.produto = require("./produto.js")(connection);
 
 module.exports = db;

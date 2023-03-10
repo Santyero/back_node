@@ -1,8 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const login = require('./app/routes/login.routes');
-const pessoa = require('./app/routes/pessoa.routes');
+const produto = require('./app/routes/produto.routes');
 
 const PORT = process.env.PORT || 8250;
 
@@ -31,8 +30,7 @@ app.get("/", (req, res) => {
 
 
 // Rotas
-app.use("/login", login)
-app.use("/pessoa", pessoa)
+app.use("/produto", produto)
 
 app.listen(PORT, () => {
   console.log(`\n \n Servidor rodando na porta::: ${PORT}.`);
